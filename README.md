@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zápisky: Co je to Prisma a jak funguje
 
-## Getting Started
+## Základní definice
+Prisma je moderní ORM (Object-Relational Mapping) nástroj. V architektuře aplikace slouží jako softwarová mezivrstva, která propojuje aplikační logiku (backend psaný v TypeScriptu) se samotným databázovým systémem (např. SQLite, PostgreSQL).
 
-First, run the development server:
+## Tři hlavní pilíře fungování
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. Prisma Schema (`schema.prisma`)
+Proces vývoje začíná definicí schématu. Pomocí deklarativní syntaxe se definují datové modely (tabulky) a jejich atributy (sloupce), včetně přesných datových typů (např. `Int`, `String`) a omezení (např. primární klíče).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Prisma Migrate
+Modul odpovědný za synchronizaci schématu s fyzickou databází. Nástroj analyzuje soubor `schema.prisma` a generuje nízkoúrovňové DDL (Data Definition Language) SQL příkazy, například `CREATE TABLE`. Tyto příkazy exekuuje přímo na databázovém serveru nebo souboru.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Prisma Client
+Klíčový nástroj pro běh aplikace (Runtime). Příkaz `prisma generate` vytvoří v adresáři `node_modules` typově striktního klienta na základě aktuálního schématu. 
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Při samotném zápisu kódu se nevyužívají standardní textové SQL dotazy (např. `INSERT INTO Item...`). Databázové operace se provádějí voláním asynchronních metod nad vygenerovaným objektem:
+* Pro čtení: `await prisma.item.findMany()`
+* Pro zápis: `await prisma.item.create()`
 
-## Learn More
+Prisma Client tyto objektové metody interně zkompiluje do platné SQL syntaxe `=>` naváže spojení s databází a odešle požadavek `=>` přijme surová relační data a transformuje je zpět na standardní datové struktury (objekty a pole) použitelné v TypeScriptu.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Technické výhody
+* **Striktní typová kontrola (Type Safety):** Díky plné integraci s TypeScriptem hlásí kompilátor chyby ještě před spuštěním kódu, pokud se vývojář pokusí zapsat nesprávný datový typ.
+* **Automatické doplňování kódu (IntelliSense):** Vývojové prostředí přesně zná strukturu tabulek a nabízí existující metody a sloupce přímo během psaní.
+* **Abstrakce datové vrstvy:** Programátor manipuluje s daty pomocí standardních programovacích konstruktů bez nutnosti implementovat manuální SQL spojení.
